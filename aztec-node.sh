@@ -169,16 +169,16 @@ telegram_bot_setup() {
 # ===================== MENU ==========================
 while true; do
     clear
-    echo -e "${BLUE}================ AZTEC NODE MANAGER =================${NC}"
-    echo -e "1) Full Install (no Docker)"
+    echo -e "${BLUE}================ AZTEC NODE MANAGER BY SOUROV JOY=================${NC}"
+    echo -e "1) Full Install (Systemd)"
     echo -e "2) Reconfigure RPC/Key"
     echo -e "3) View Logs"
     echo -e "4) Uninstall"
-    echo -e "5) Check RPC Health (Industry Standard)"
+    echo -e "5) Check RPC Health (Node Standard)"
     echo -e "6) Show Peer ID"
     echo -e "7) Telegram Bot Monitor Setup"
     echo -e "8) Exit"
-    echo -e "${BLUE}====================================================${NC}"
+    echo -e "${BLUE}==================================================================${NC}"
     read -p "Choose option (1-8): " choice
 
     case $choice in
