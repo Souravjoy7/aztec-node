@@ -9,7 +9,8 @@
 # 5) Check RPC Health (Downloaded)
 # 6) Show Peer ID
 # 7) Telegram Bot Monitor Setup (Downloaded)
-# 8) Exit
+# 8) Update Node
+# 9) Exit
 
 # Color Codes
 RED='\033[0;31m'
@@ -166,6 +167,14 @@ telegram_bot_setup() {
     bash <(curl -s https://raw.githubusercontent.com/Souravjoy7/aztec-node-tools/main/aztec_telegram_monitor.sh)
 }
 
+update_node() {
+    echo -e "${YELLOW}🔄 Updating Aztec Node...${NC}"
+    systemctl stop aztec-node
+    aztec-up latest
+    systemctl start aztec-node
+    echo -e "${GREEN}✅ Node updated successfully!${NC}"
+}
+
 # ===================== MENU ==========================
 while true; do
     clear
@@ -177,9 +186,10 @@ while true; do
     echo -e "5) Check RPC Health (Node Standard)"
     echo -e "6) Show Peer ID"
     echo -e "7) Telegram Bot Monitor Setup"
-    echo -e "8) Exit"
+    echo -e "8) Update Node"
+    echo -e "9) Exit"
     echo -e "${BLUE}==================================================================${NC}"
-    read -p "Choose option (1-8): " choice
+    read -p "Choose option (1-9): " choice
 
     case $choice in
         1) install_full ;;
@@ -189,7 +199,8 @@ while true; do
         5) check_rpc_health ;;
         6) show_peer_id ;;
         7) telegram_bot_setup ;;
-        8) break ;;
+        8) update_node ;;
+        9) break ;;
         *) echo -e "${RED}Invalid option!${NC}"; sleep 1 ;;
     esac
     read -p "Press Enter to return to menu..."
