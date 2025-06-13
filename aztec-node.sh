@@ -1,16 +1,15 @@
 #!/bin/bash
 
-# ======================== AZTEC NODE MANAGER BY SOURAV JOY ==========================
-# This script includes:
-# 1. Full Node Install
-# 2. Reconfigure
-# 3. View Logs
-# 4. Uninstall
-# 5. Industry-Standard RPC Health Checker
-# 6. Show Peer ID
-# 7. Telegram Bot Setup (Install/Uninstall)
-# 8. Exit
-# ====================================================================================
+# AZTEC NODE MANAGER BY SOURAV JOY (Updated to load external scripts from GitHub)
+# Menu Options:
+# 1) Full Install
+# 2) Reconfigure
+# 3) View Logs
+# 4) Uninstall
+# 5) Check RPC Health (Downloaded)
+# 6) Show Peer ID
+# 7) Telegram Bot Monitor Setup (Downloaded)
+# 8) Exit
 
 # Color Codes
 RED='\033[0;31m'
@@ -25,9 +24,9 @@ AZTEC_DATA_DIR="$AZTEC_DIR/alpha-testnet"
 
 install_full() {
     echo -e "${YELLOW}🚀 Starting Full Installation...${NC}"
-    if [ "$(id -u)" -ne 0 ]; then echo -e "${RED}Error: Run as root${NC}"; exit 1; fi
+    if [ "$(id -u)" -ne 0 ]; then echo -e "${RED}Run as root${NC}"; exit 1; fi
 
-    echo -e "${GREEN}Killing any process using port 40400...${NC}"
+    echo -e "${GREEN}Killing process using port 40400...${NC}"
     lsof -i :40400 -t | xargs -r kill -9
 
     echo -e "${GREEN}Updating system...${NC}"
@@ -87,7 +86,7 @@ LimitNOFILE=65535
 WantedBy=multi-user.target
 EOF
 
-    echo -e "${GREEN}Creating port forwarding with socat...${NC}"
+    echo -e "${GREEN}Creating socat port forwarders...${NC}"
     cat <<EOF > /etc/systemd/system/forward-8080.service
 [Unit]
 Description=Port Forward 8080 -> 8081
@@ -118,34 +117,29 @@ EOF
     systemctl enable aztec-node forward-8080 forward-40400
     systemctl start aztec-node forward-8080 forward-40400
 
-    echo -e "${GREEN}✅ Installation complete! Use Option 5 to check RPC health.${NC}"
+    echo -e "${GREEN}✅ Installation complete!${NC}"
 }
 
 reconfigure() {
     echo -e "${YELLOW}🔧 Reconfiguring Aztec Node...${NC}"
-    if [ ! -f "$AZTEC_SERVICE" ]; then echo -e "${RED}Service not found. Run full install first.${NC}"; return; fi
-    read -p "New L1 RPC URL: " NEW_RPC
-    read -p "New Consensus Host: " NEW_CONSENSUS
-    read -p "Validator Private Key: " NEW_KEY
-    read -p "Coinbase Address: " NEW_COINBASE
-    PUBLIC_IP=$(curl -4 -s ifconfig.me)
+    if [ ! -f "$AZTEC_SERVICE" ]; then echo -e "${RED}Service not found.${NC}"; return; fi
+    read -p "L1 RPC URL: " RPC
+    read -p "Consensus URL: " CONS
+    read -p "Validator Key: " KEY
+    read -p "Coinbase Address: " CB
+    PUBIP=$(curl -4 -s ifconfig.me)
 
     systemctl stop aztec-node
-    sed -i -e "s|--l1-rpc-urls .*|--l1-rpc-urls $NEW_RPC \\\\|" \
-           -e "s|--l1-consensus-host-urls .*|--l1-consensus-host-urls $NEW_CONSENSUS \\\\|" \
-           -e "s|--sequencer.validatorPrivateKey .*|--sequencer.validatorPrivateKey $NEW_KEY \\\\|" \
-           -e "s|--sequencer.coinbase .*|--sequencer.coinbase $NEW_COINBASE \\\\|" \
-           -e "s|--p2p.p2pIp .*|--p2p.p2pIp $PUBLIC_IP \\\\|" "$AZTEC_SERVICE"
-
+    sed -i -e "s|--l1-rpc-urls .*|--l1-rpc-urls $RPC \\\\|" \
+           -e "s|--l1-consensus-host-urls .*|--l1-consensus-host-urls $CONS \\\\|" \
+           -e "s|--sequencer.validatorPrivateKey .*|--sequencer.validatorPrivateKey $KEY \\\\|" \
+           -e "s|--sequencer.coinbase .*|--sequencer.coinbase $CB \\\\|" \
+           -e "s|--p2p.p2pIp .*|--p2p.p2pIp $PUBIP \\\\|" $AZTEC_SERVICE
     systemctl daemon-reload && systemctl restart aztec-node
-    systemctl is-active --quiet aztec-node && echo -e "${GREEN}✅ Node reconfigured and running.${NC}" || {
-        echo -e "${RED}❌ Failed to start. Check logs.${NC}"
-        journalctl -u aztec-node -n 20 --no-pager
-    }
 }
 
 view_logs() {
-    echo -e "${YELLOW}📜 Viewing live logs...${NC}"
+    echo -e "${YELLOW}📜 Viewing logs...${NC}"
     journalctl -u aztec-node -f --no-pager
 }
 
@@ -156,24 +150,23 @@ uninstall() {
     rm -f $AZTEC_SERVICE /etc/systemd/system/forward-8080.service /etc/systemd/system/forward-40400.service
     systemctl daemon-reload
     rm -rf $AZTEC_DIR
-    echo -e "${GREEN}✅ Uninstallation complete.${NC}"
+    echo -e "${GREEN}✅ Uninstalled.${NC}"
 }
 
 check_rpc_health() {
-    bash <(curl -s https://raw.githubusercontent.com/souravjoy/aztec-node-tools/main/rpc_health_check.sh)
+    bash <(curl -s https://raw.githubusercontent.com/Souravjoy7/aztec-node-tools/main/rpc_health_check.sh)
 }
 
 show_peer_id() {
-    echo -e "${YELLOW}🔍 Fetching Peer ID...${NC}"
-    PEER_ID=$(journalctl -u aztec-node -n 100000 --no-pager | grep -i "peerId" | grep -o '"peerId":"[^\"]*"' | cut -d'"' -f4 | head -n 1)
-    [[ -z "$PEER_ID" ]] && echo -e "${RED}❌ Peer ID not found.${NC}" || echo -e "${GREEN}✅ Peer ID: ${YELLOW}$PEER_ID${NC}"
+    PEER_ID=$(journalctl -u aztec-node -n 10000 --no-pager | grep -i "peerId" | grep -o '"peerId":"[^"]*"' | cut -d'"' -f4 | head -n 1)
+    [[ -z "$PEER_ID" ]] && echo -e "${RED}❌ Not found.${NC}" || echo -e "${GREEN}✅ Peer ID: ${PEER_ID}${NC}"
 }
 
-telegram_monitor_setup() {
-    bash <(curl -s https://raw.githubusercontent.com/souravjoy/aztec-node-tools/main/aztec_telegram_monitor.sh)
+telegram_bot_setup() {
+    bash <(curl -s https://raw.githubusercontent.com/Souravjoy7/aztec-node-tools/main/aztec_telegram_monitor.sh)
 }
 
-# ============================== MENU ==============================
+# ===================== MENU ==========================
 while true; do
     clear
     echo -e "${BLUE}================ AZTEC NODE MANAGER =================${NC}"
@@ -195,7 +188,7 @@ while true; do
         4) uninstall ;;
         5) check_rpc_health ;;
         6) show_peer_id ;;
-        7) telegram_monitor_setup ;;
+        7) telegram_bot_setup ;;
         8) break ;;
         *) echo -e "${RED}Invalid option!${NC}"; sleep 1 ;;
     esac
