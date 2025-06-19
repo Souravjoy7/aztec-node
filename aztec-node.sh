@@ -170,7 +170,7 @@ telegram_bot_setup() {
 update_node() {
     echo -e "${YELLOW}🔄 Updating Aztec Node...${NC}"
     systemctl stop aztec-node
-    source ~/.bashrc
+    export PATH="$PATH:/root/.aztec/bin"
     aztec-up latest
     systemctl start aztec-node
     echo -e "${GREEN}✅ Node updated successfully!${NC}"
