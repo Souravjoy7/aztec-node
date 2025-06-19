@@ -14,8 +14,12 @@ This script automates the installation, configuration, and management of an Azte
 - User-friendly interactive menu
 
 ## Requirements:
-- Ubuntu-based VPS (tested on 20.04+)
+- Ubuntu-based VPS
 - Root or sudo privileges
+- CPU: 6-8 Cores
+- RAM: 6-16 GB
+- Storage: 160GB-1TB
+
 
 ## Installation:
 To download and run the script directly:
