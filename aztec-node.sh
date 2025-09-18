@@ -70,7 +70,7 @@ ExecStart=/root/.aztec/bin/aztec start \\
   --node \\
   --archiver \\
   --sequencer \\
-  --network alpha-testnet \\
+  --network testnet \\
   --l1-rpc-urls http://127.0.0.1:8545 \\
   --l1-consensus-host-urls http://127.0.0.1:3500 \\
   --sequencer.validatorPrivateKey YOUR_KEY \\
