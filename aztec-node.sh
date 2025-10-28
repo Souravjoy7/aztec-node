@@ -78,7 +78,7 @@ ExecStart=/root/.aztec/bin/aztec start \\
   --p2p.p2pIp $PUBLIC_IP \\
   --port 8081 \\
   --admin-port 8880 \\
-  --sequencer.governanceProposerPayload 0x54F7fe24E349993b363A5Fa1bccdAe2589D5E5Ef
+  --sequencer.governanceProposerPayload 0xDCd9DdeAbEF70108cE02576df1eB333c4244C666
 Restart=always
 RestartSec=5
 LimitNOFILE=65535
@@ -171,7 +171,7 @@ update_node() {
     echo -e "${YELLOW}🔄 Updating Aztec Node...${NC}"
     systemctl stop aztec-node
     export PATH="$PATH:/root/.aztec/bin"
-    aztec-up latest
+    aztec-up 2.0.4
     systemctl start aztec-node
     echo -e "${GREEN}✅ Node updated successfully!${NC}"
 }
